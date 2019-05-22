@@ -27,6 +27,7 @@ class RegistrationComponent extends Component
 
     public function run(RegistrationRequest $request): RegistrationResponse
     {
+        die('ff');
         if ($this->recaptcha) {
             $this->checkRecaptcha($request);
         }
