@@ -9,10 +9,11 @@
 namespace Zvinger\BaseClasses\app\modules\api\base\controllers;
 
 use yii\web\Controller;
+use Zvinger\BaseClasses\api\controllers\BaseApiController;
 use Zvinger\BaseClasses\app\modules\api\base\requests\registration\RegistrationRequest;
 
 
-class RegistrationController extends Controller
+class RegistrationController extends BaseApiController
 {
     public function actionIndex()
     {
