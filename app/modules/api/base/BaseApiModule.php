@@ -27,7 +27,9 @@ class BaseApiModule extends ApiModule
             ],
             'loginComponent' => [
                 'class' => LoginComponent::class,
-                'google2FA' => $this->loginConfig['google2FA'] ?: false
+                'google2FA' => $this->loginConfig['google2FA'] ?: false,
+                'recaptcha' => $this->loginConfig['recaptcha'] ?: false
+
             ]
         ];
         parent::init();
