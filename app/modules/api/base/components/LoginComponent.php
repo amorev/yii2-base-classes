@@ -28,8 +28,6 @@ class LoginComponent extends Component
 
     public function run(LoginRequest $request): BaseAuthLoginResponse
     {
-        $this->checkRecaptcha($request);
-
         $user = UserObject::find()->andWhere(
             ['or',
                 ['username' => $request->username],
@@ -40,10 +38,8 @@ class LoginComponent extends Component
             throw new UnauthorizedHttpException("Wrong username or password");
         }
 
-        if ($this->google2FA) {
-            $google2FACode = $request->special['google2FACode'] ?: false;
-            $this->checkGoogle2FACode($user->id, $google2FACode);
-        }
+        $this->checkGoogle2FACode($user->id, $request);
+        $this->checkRecaptcha($request);
 
         $identity = UserIdentity::findIdentity($user->id);
         $handler = new UserTokenHandler($identity->getId());
@@ -58,27 +54,29 @@ class LoginComponent extends Component
         );
     }
 
-    private function checkGoogle2FACode($userId, $google2FACode)
+    private function checkGoogle2FACode($userId, $request)
     {
-        if (!class_exists('Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent')) {
-            throw new GoogleAuthenticatorNotFound();
-        }
-        $googleAuthenticatorComponent = new Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent();
-
-        if ($googleAuthenticatorComponent->getUserGoogleAuthStatus($userId)) {
-
-            if (!$google2FACode) {
-                throw new UnauthorizedHttpException("Google 2fa code not found");
+        if ($this->google2FA) {
+            if (!class_exists('Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent')) {
+                throw new GoogleAuthenticatorNotFound();
             }
+            $googleAuthenticatorComponent = new Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent();
 
-            $result = $googleAuthenticatorComponent->validateUserCode($userId, $google2FACode);
+            if ($googleAuthenticatorComponent->getUserGoogleAuthStatus($userId)) {
 
-            if (!$result) {
-                throw new UnauthorizedHttpException("Invalid google 2fa code");
+                if (!$request->special['google2FACode']) {
+                    throw new UnauthorizedHttpException("Google 2fa code not found");
+                }
+
+                $result = $googleAuthenticatorComponent->validateUserCode($userId, $request->special['google2FACode']);
+
+                if (!$result) {
+                    throw new UnauthorizedHttpException("Invalid google 2fa code");
+                }
+
             }
-
         }
-
+        return true;
     }
 
     private function checkRecaptcha($request)
