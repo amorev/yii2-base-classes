@@ -11,7 +11,6 @@ namespace Zvinger\BaseClasses\app\graphql\base\types\query\fileInfo;
 
 use GraphQL\Type\Definition\Type;
 use Zvinger\BaseClasses\app\graphql\base\BaseGraphQLObjectType;
-use Zvinger\BaseClasses\app\modules\fileStorage\VendorFileStorageModule;
 
 class FileInfoType extends BaseGraphQLObjectType
 {
@@ -30,7 +29,7 @@ class FileInfoType extends BaseGraphQLObjectType
                     'fileUrl' => [
                         'type' => Type::string(),
                         'resolve' => function ($id) {
-                            $storage = VendorFileStorageModule::getInstance()->storage;
+                            $storage = \Yii::$app->getModule(FILE_STORAGE_MODULE)->storage;
                             if ($storage) {
                                 $fileModel = $storage->getFile($id);
                                 if ($fileModel)
