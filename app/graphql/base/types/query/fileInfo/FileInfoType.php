@@ -26,7 +26,7 @@ class FileInfoType extends BaseGraphQLObjectType
                             return $id;
                         },
                     ],
-                    'fileUrl' => [
+                    'fullUrl' => [
                         'type' => Type::string(),
                         'resolve' => function ($id) {
                             $storage = \Yii::$app->getModule(FILE_STORAGE_MODULE)->storage;
