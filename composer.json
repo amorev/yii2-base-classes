@@ -20,7 +20,8 @@
     "league/flysystem-aws-s3-v3": "^1.0",
     "aws/aws-sdk-php": "~3.0",
     "aws/aws-sdk-php-resources": "^0.3.0",
-    "webonyx/graphql-php": "^v0.13.1"
+    "webonyx/graphql-php": "^v0.13.1",
+    "trntv/yii2-file-kit": "dev-master"
   },
   "autoload": {
     "psr-4": {
