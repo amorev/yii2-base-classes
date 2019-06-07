@@ -60,7 +60,5 @@ class BaseApiModule extends ApiModule
         ];
         parent::init();
     }
-}
-
 
 }
