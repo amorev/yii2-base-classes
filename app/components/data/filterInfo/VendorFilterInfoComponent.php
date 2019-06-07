@@ -84,14 +84,14 @@ class VendorFilterInfoComponent
         return $objects;
     }
 
-    public function getDictionaryBlockForSelect($objectId)
+    public function getDictionaryBlockForSelect($objectId, $useSlug = true)
     {
         $objects = $this->getDictionaryBlock($objectId);
         $result = [];
         foreach ($objects as $object) {
             $result[] = \Yii::createObject([
                 'class' => SingleDictionaryElementForSelect::class,
-                'key'   => $object->id,
+                'key'   => ($useSlug && $object->slug) ? $object->slug : $object->id,
                 'value' => $object->title,
             ]);
         }

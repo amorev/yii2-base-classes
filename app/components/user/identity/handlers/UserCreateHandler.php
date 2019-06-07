@@ -11,6 +11,7 @@ namespace Zvinger\BaseClasses\app\components\user\identity\handlers;
 use yii\base\Event;
 use Zvinger\BaseClasses\app\components\user\exceptions\UserCreateException;
 use Zvinger\BaseClasses\app\components\user\identity\events\EventActivationUpdated;
+use Zvinger\BaseClasses\app\exceptions\model\ModelValidateException;
 use Zvinger\BaseClasses\app\helpers\error\ErrorMessageHelper;
 use app\models\work\user\object\UserObject;
 use yii\base\BaseObject;
@@ -71,11 +72,11 @@ class UserCreateHandler extends BaseObject
         $user->username = $this->_username;
         $user->email = $this->_email;
         $user->password = $this->_password;
-        $result = $user->save();
-        if (!$result) {
-            throw new UserCreateException($user);
+        $user->validate();
+        if ($user->firstErrors){
+            throw new ModelValidateException($user);
         }
-
+        $user->save();
         return $user;
     }
 }

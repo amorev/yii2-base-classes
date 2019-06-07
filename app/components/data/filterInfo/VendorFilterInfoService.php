@@ -11,6 +11,7 @@ namespace Zvinger\BaseClasses\app\components\data\filterInfo;
 use yii\base\BaseObject;
 use yii\base\InvalidCallException;
 use yii\base\UnknownPropertyException;
+use yii\db\Expression;
 use yii\db\Query;
 use Zvinger\BaseClasses\app\components\data\filterInfo\models\BaseFilterElement;
 use Zvinger\BaseClasses\app\components\data\filterInfo\models\DBFilterMiscInfo;
@@ -61,18 +62,30 @@ class VendorFilterInfoService extends BaseObject
      * @param mixed $value
      * @return
      */
-    public static function getFilterIdsQuery(array $elements = [])
+    public static function getFilterIdsQuery(array $elements = [], $allIds = [])
     {
         $query = DBFilterMiscInfo::find();
         $keys = array_keys($elements);
-        $query
-            ->select(['object_id', 'val_id' => 'count(`value_id`)', 'val_data' => 'count(`value_data`)'])
-            ->where([
-                'and',
+        $arr = [
+            'and',
+        ];
+        if ($allIds) {
+            $arr[] = ['object_id' => $allIds];
+        }
+        $arr = array_merge(
+            $arr,
+            [
                 ['object_type' => static::$object_type],
                 ['key' => $keys],
-            ])
-            ->groupBy(['object_id', 'key', 'value_id', 'value_data']);
+            ]
+        );
+        $query
+            ->select(['object_id'])
+            ->where($arr)
+            ->groupBy(['object_id', 'key', 'value_id', 'value_data'])
+            ->orderBy(new Expression('null'));
+//        d($query->createCommand()->rawSql);
+//        die;
         $havingCondition = ['or'];
         foreach ($elements as $key => $element) {
             $havingCondition[] = ['and', ['key' => $key], $element];
@@ -82,7 +95,8 @@ class VendorFilterInfoService extends BaseObject
         $queryIds->from(['filter' => $query])
             ->select(['object_id'])
             ->groupBy(['object_id'])
-            ->having(['count(object_id)' => count($keys)]);
+            ->having(['count(object_id)' => count($keys)])
+            ->orderBy(new Expression('null'));
         $objectIds = $queryIds->column();
 
         return $objectIds;
@@ -90,22 +104,28 @@ class VendorFilterInfoService extends BaseObject
 
     public function setSimple($key, $value, $isDictionary)
     {
-        return $this->setObjectDataByKey($key, new SimpleValueElement(
-            [ //  тут пример для информации которая сохраняется в виде единичного экземпляра
-              'value'        => $value,
-              'isDictionary' => $isDictionary, //Если мы привязываемся к инфе из dictionary_info
-            ]));
+        return $this->setObjectDataByKey(
+            $key,
+            new SimpleValueElement(
+                [ //  тут пример для информации которая сохраняется в виде единичного экземпляра
+                    'value' => $value,
+                    'isDictionary' => $isDictionary, //Если мы привязываемся к инфе из dictionary_info
+                ]
+            )
+        );
     }
 
     public function getData($key)
     {
         $query = DBFilterMiscInfo::find()
-            ->where([
-                'and',
-                ['object_type' => static::$object_type],
-                ['object_id' => $this->object_id],
-                ['key' => $key],
-            ]);
+            ->where(
+                [
+                    'and',
+                    ['object_type' => static::$object_type],
+                    ['object_id' => $this->object_id],
+                    ['key' => $key],
+                ]
+            );
         $objects = $query->all();
 
         return $objects;

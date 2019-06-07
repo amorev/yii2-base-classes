@@ -18,5 +18,10 @@ class UserCreatedEvent extends Event
      */
     public $user;
 
+    /**
+     * @var VendorUserObject
+     */
+    public $special = null;
+
 
 }

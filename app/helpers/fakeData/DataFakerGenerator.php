@@ -49,4 +49,18 @@ class DataFakerGenerator
 
         return $result;
     }
+
+
+    public static function fakeArrayByExample(callable $example, $min = 1, $max = 10)
+    {
+        $count = rand($min, $max);
+        $i = $min;
+        $result = [];
+        while ($i < ($min+$count)) {
+            $result[] = $example();
+            $i++;
+        }
+
+        return $result;
+    }
 }
