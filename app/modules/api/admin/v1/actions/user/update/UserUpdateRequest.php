@@ -8,12 +8,14 @@
 
 namespace Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\update;
 
+use Zvinger\BaseClasses\api\request\BaseApiRequest;
+
 /**
  * Class UserUpdateRequest
  * @package Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\update
  * @SWG\Definition()
  */
-class UserUpdateRequest
+class UserUpdateRequest extends BaseApiRequest
 {
     /**
      * @var string

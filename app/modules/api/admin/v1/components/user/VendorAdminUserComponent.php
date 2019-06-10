@@ -9,14 +9,15 @@
 namespace Zvinger\BaseClasses\app\modules\api\admin\v1\components\user;
 
 use app\models\work\user\object\UserObject;
-use yii\base\Event;
-use yii\rbac\Role;
+use yii\helpers\Json;
+use yii\web\BadRequestHttpException;
 use Zvinger\BaseClasses\app\exceptions\model\ModelValidateException;
 use Zvinger\BaseClasses\app\models\work\user\object\VendorUserObject;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\create\UserCreateRequest;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\update\UserUpdateRequest;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\AdminApiVendorModule;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\models\UserApiAdminV1Model;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\models\UserApiAdminV1ModelList;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\models\UserSetInfo;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\events\AdminUserBeforeSendEvent;
 
@@ -44,6 +45,26 @@ class VendorAdminUserComponent
         AdminApiVendorModule::getInstance()->trigger(AdminApiVendorModule::EVENT_USER_BEFORE_SEND, $event);
 
         return $userApiAdminV1Model;
+    }
+
+    public function convertUserObjectsToModels(array $userObjects)
+    {
+        $userApiAdminV1ModelList = new UserApiAdminV1ModelList();
+        foreach ($userObjects as $userObject) {
+            $userApiAdminV1Model = new UserApiAdminV1Model(
+                [
+                    'username' => $userObject->username,
+                    'email' => $userObject->email,
+                    'id' => $userObject->id,
+                    'status' => $userObject->status,
+                    'loggedAt' => $userObject->logged_at,
+                    'roles' => $this->getUserRoles($userObject->id),
+                ]
+            );
+            $userApiAdminV1ModelList->userModels[] = $userApiAdminV1Model;
+        }
+
+        return $userApiAdminV1ModelList;
     }
 
     /**
@@ -100,12 +121,33 @@ class VendorAdminUserComponent
         foreach ($userCreateRequest as $key => $value) {
             $userSetInfo->{$key} = $value;
         }
+        if (!$userSetInfo->username) {
+            $userSetInfo->username = $userSetInfo->email;
+        }
+        if (!$userSetInfo->password) {
+            throw new BadRequestHttpException('Password is required');
+        }
+        if (!$userSetInfo->email) {
+            throw new BadRequestHttpException('Email is required');
+        }
         $this->setUserInfo($userObject, $userSetInfo);
 
         if (!$userObject->save()) {
-            throw new ModelValidateException($userObject);
+            throw new BadRequestHttpException(Json::encode($userObject->firstErrors));
         }
         $this->setUserRoles($userObject, $userSetInfo->roles);
+
+        \Yii::$app->mailer->compose()
+            ->setTo($userSetInfo->email)
+            ->setSubject('Create New Account')
+            ->setTextBody(
+                'Для вас был создан пользователь в системе' . PHP_EOL .
+                'Логин: ' . $userSetInfo->username . PHP_EOL .
+                'Пароль: ' . $userSetInfo->password
+            )
+            ->send();
+
+        \Yii::$app->telegram->message('admin', 'Create new user' . PHP_EOL . 'Project: ' . \Yii::$app->request->getHostName());
 
         return $userObject->id;
     }
