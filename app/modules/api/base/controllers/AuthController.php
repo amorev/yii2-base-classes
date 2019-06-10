@@ -14,11 +14,10 @@ use yii\web\NotFoundHttpException;
 use Zvinger\BaseClasses\app\components\email\models\SendData;
 use \Zvinger\BaseClasses\app\components\user\token\UserTokenHandler;
 use app\models\work\user\object\UserObject;
+use Zvinger\BaseClasses\app\modules\api\base\requests\auth\LoginRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordConfirmRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordInitRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\SavePasswordRequest;
-use Zvinger\BaseClasses\app\modules\api\base\responses\auth\BaseAuthLoginResponse;
-use yii\web\UnauthorizedHttpException;
 use Zvinger\BaseClasses\api\controllers\BaseApiController;
 use Zvinger\BaseClasses\app\modules\api\base\responses\auth\ResetPasswordInitResponse;
 use Zvinger\BaseClasses\app\modules\api\base\responses\auth\SavePasswordResponse;
@@ -56,25 +55,8 @@ class AuthController extends BaseApiController
      */
     public function actionLogin()
     {
-        $username = $this->checkAndGet('username');
-        $password = $this->checkAndGet('password');
-        $user = UserObject::find()->andWhere(['or', ['username' => $username], ['email' => $username]])->one();
-
-        if (empty($user) || !$user->validatePassword($password)) {
-            throw new UnauthorizedHttpException("Wrong username or password");
-        }
-
-        $identity = UserIdentity::findIdentity($user->id);
-        $handler = new UserTokenHandler($identity->getId());
-        $tokenObject = $handler->generateBearerToken();
-
-        return \Yii::configure(
-            new BaseAuthLoginResponse(),
-            [
-                'token' => $tokenObject->token,
-                'user' => $tokenObject->user_id,
-            ]
-        );
+        $requst = new LoginRequest();
+        return $this->module->loginComponent->run($requst::createRequest());
     }
 
     /**

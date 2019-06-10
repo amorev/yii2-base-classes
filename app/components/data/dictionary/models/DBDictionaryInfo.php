@@ -3,6 +3,7 @@
 namespace Zvinger\BaseClasses\app\components\data\dictionary\models;
 
 use Yii;
+use yii\behaviors\SluggableBehavior;
 
 /**
  * This is the model class for table "dictionary_info".
@@ -11,6 +12,7 @@ use Yii;
  * @property int $parent_id
  * @property string $title
  * @property string $description
+ * @property string $slug
  * @property int $sort
  * @property int $fixed
  * @property int $created_at
@@ -28,6 +30,17 @@ class DBDictionaryInfo extends \yii\db\ActiveRecord
         return 'dictionary_info';
     }
 
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => SluggableBehavior::class,
+                'attribute' => 'title',
+            ],
+        ];
+    }
+
+
     /**
      * {@inheritdoc}
      */
@@ -36,8 +49,14 @@ class DBDictionaryInfo extends \yii\db\ActiveRecord
         return [
             [['parent_id', 'sort', 'fixed', 'created_at', 'updated_at', 'created_by', 'updated_by'], 'integer'],
             [['description'], 'string'],
-            [['title'], 'string', 'max' => 255],
-            [['parent_id'], 'exist', 'skipOnError' => true, 'targetClass' => DBDictionaryInfo::className(), 'targetAttribute' => ['parent_id' => 'id']],
+            [['title', 'slug'], 'string', 'max' => 255],
+            [
+                ['parent_id'],
+                'exist',
+                'skipOnError' => true,
+                'targetClass' => DBDictionaryInfo::className(),
+                'targetAttribute' => ['parent_id' => 'id'],
+            ],
         ];
     }
 

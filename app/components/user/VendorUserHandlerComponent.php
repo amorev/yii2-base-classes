@@ -10,15 +10,15 @@ namespace Zvinger\BaseClasses\app\components\user;
 
 use app\components\user\identity\UserIdentity;
 use app\models\work\user\object\UserObject;
+use yii\base\Component;
+use Zvinger\BaseClasses\app\components\data\miscInfo\VendorUserMiscInfoService;
+use Zvinger\BaseClasses\app\components\user\events\UserBeforeCreateEvent;
 use Zvinger\BaseClasses\app\components\user\events\UserCreatedEvent;
 use Zvinger\BaseClasses\app\components\user\exceptions\UserCreateException;
 use Zvinger\BaseClasses\app\components\user\exceptions\UserLoginException;
 use Zvinger\BaseClasses\app\components\user\identity\handlers\UserActivateHandler;
 use Zvinger\BaseClasses\app\components\user\identity\handlers\UserCreateHandler;
-use yii\base\BaseObject;
-use yii\base\Component;
 use Zvinger\BaseClasses\app\components\user\identity\VendorUserIdentity;
-use Zvinger\BaseClasses\app\components\data\miscInfo\VendorUserMiscInfoService;
 use Zvinger\BaseClasses\app\components\user\token\UserTokenHandler;
 use Zvinger\BaseClasses\app\exceptions\model\ModelValidateException;
 use Zvinger\BaseClasses\app\models\db\user\object\DBUserObject;
@@ -27,6 +27,8 @@ use Zvinger\BaseClasses\app\models\work\user\object\VendorUserObject;
 class VendorUserHandlerComponent extends Component
 {
     const EVENT_USER_CREATED = 'event_user_created';
+
+    const EVENT_USER_BEFORE_CREATE = 'event_user_before_create';
 
     public $onlineSeconds = 3 * MINUTE;
 
@@ -41,12 +43,22 @@ class VendorUserHandlerComponent extends Component
      * @param $email
      * @param $password
      * @param null $username
+     * @param null $special
      * @return UserObject
      * @throws \Exception
      * @throws UserCreateException
      */
-    public function createUser($email, $password, $username = null)
+    public function createUser($email, $password, $username = null, $special = null)
     {
+        $this->trigger(self::EVENT_USER_BEFORE_CREATE, new UserBeforeCreateEvent(
+            [
+                'special' => $special,
+                'email' => $email,
+                'password' => $password,
+                'username' => $username
+            ]
+        ));
+
         $handler = new UserCreateHandler();
         \Yii::configure(
             $handler,
@@ -58,7 +70,7 @@ class VendorUserHandlerComponent extends Component
         );
 
         $userObject = $handler->createUser();
-        $this->trigger(self::EVENT_USER_CREATED, new UserCreatedEvent(['user' => $userObject]));
+        $this->trigger(self::EVENT_USER_CREATED, new UserCreatedEvent(['user' => $userObject, 'special' => $special]));
 
         return $userObject;
     }
@@ -149,8 +161,7 @@ class VendorUserHandlerComponent extends Component
 
     public function isOnline($user_id)
     {
-        return (time() - DBUserObject::find()->select('logged_at')->where(['id' => $user_id])->scalar(
-                )) < $this->onlineSeconds;
+        return (time() - DBUserObject::find()->select('logged_at')->where(['id' => $user_id])->scalar()) < $this->onlineSeconds;
     }
 
     public function updateOnline($user_id)
