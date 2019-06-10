@@ -90,7 +90,7 @@ class UserController extends BaseVendorAdminV1Controller
     {
         $user = UserObject::findOne($id);
         /** @var UserUpdateRequest $request */
-        $request = \Yii::configure(new UserUpdateRequest(), \Yii::$app->request->post());
+        $request = UserUpdateRequest::createRequest();
         $this->module->userComponent->updateUser($id, $request);
         AdminApiVendorModule::getInstance()->trigger(AdminApiVendorModule::EVENT_USER_SAVED, new AdminUserSavedEvent([
             'userId' => $id,
