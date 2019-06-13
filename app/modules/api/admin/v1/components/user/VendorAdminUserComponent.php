@@ -147,8 +147,12 @@ class VendorAdminUserComponent
             )
             ->send();
 
-        \Yii::$app->telegram->message('admin', 'Create new user' . PHP_EOL . 'Project: ' . \Yii::$app->request->getHostName());
-
+        try {
+            \Yii::$app->telegram->message('admin', 'Create new user' . PHP_EOL . 'Project: ' . \Yii::$app->request->getHostName());
+        } catch (\Exception $e) {
+            \Yii::info($e, 'errors');
+        }
+        
         return $userObject->id;
     }
 
