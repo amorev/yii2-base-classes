@@ -26,7 +26,7 @@ class SimpleUserInformationSavingHandler implements
         $userObject = $this->getUserObject($userId);
         $key = $this->getMiscInfoKey();
         $data = new UserInformationModel();
-        $data->userData = $userObject->miscInfo->getNoCheck($key);
+        $data->userData = $userObject->miscInfo->getNoCheck($key) ?? new \stdClass();
 
         return $data;
     }
