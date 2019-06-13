@@ -15,6 +15,13 @@ use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation
 
 class UserSettingsController extends BaseAdminController
 {
+    public function actionGetCurrentUser()
+    {
+        return \Yii::createObject(UserInformationHandlerInterface::class)->getMainUserInformation(
+            \Yii::$app->user->id
+        );
+    }
+    
     public function actionConfiguration()
     {
         return \Yii::createObject(UserSettingsHandlerInterface::class)->getCurrentUserSettings();

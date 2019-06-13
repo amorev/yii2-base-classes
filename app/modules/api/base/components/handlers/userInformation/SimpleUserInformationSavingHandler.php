@@ -12,6 +12,7 @@ namespace Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInfor
 use yii\web\NotFoundHttpException;
 use Zvinger\BaseClasses\app\models\work\user\object\VendorUserObject;
 use Zvinger\BaseClasses\app\modules\api\base\BaseApiModule;
+use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation\models\information\MainUserInformationModel;
 use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation\models\information\UserInformationModel;
 use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation\models\settings\UserSettingsModel;
 
@@ -41,6 +42,20 @@ class SimpleUserInformationSavingHandler implements
         $userObject->miscInfo->{$this->getMiscInfoKey()} = $data;
 
         return true;
+    }
+
+    public function getMainUserInformation(int $userId): MainUserInformationModel
+    {
+        $userObject = $this->getUserObject($userId);
+        $minUserInformationModel = \Yii::createObject(
+            [
+                'class' => MainUserInformationModel::class,
+                'email' => $userObject->email,
+                'username' => $userObject->username,
+                'isAdmin' => \Yii::$app->user->can('admin')
+            ]
+        );
+        return $minUserInformationModel;
     }
 
     /**
