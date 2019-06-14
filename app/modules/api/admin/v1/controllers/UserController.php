@@ -14,8 +14,9 @@ use Zvinger\BaseClasses\app\models\work\user\object\VendorUserObject;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\create\UserCreateRequest;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\actions\user\update\UserUpdateRequest;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\AdminApiVendorModule;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\userInformation\UserInformationHandlerInterface;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\userInformation\UserSettingsHandlerInterface;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\models\UserApiAdminV1Model;
-use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\models\UserApiAdminV1ModelList;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\controllers\base\BaseVendorAdminV1Controller;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\events\AdminUserSavedEvent;
 
@@ -128,5 +129,27 @@ class UserController extends BaseVendorAdminV1Controller
         ]));
 
         return $this->module->userComponent->convertUserIdToModel($userId);
+    }
+
+    public function actionConfiguration()
+    {
+        return \Yii::createObject(UserSettingsHandlerInterface::class)->getCurrentUserSettings();
+    }
+
+    public function actionGetCurrentData()
+    {
+        return \Yii::createObject(UserInformationHandlerInterface::class)->getUserInformation(
+            \Yii::$app->request->post('id')
+        );
+    }
+
+    public function actionSaveCurrentData()
+    {
+        return [
+            'saved' => \Yii::createObject(UserInformationHandlerInterface::class)->saveUserInformation(
+                \Yii::$app->request->post('id'),
+                \Yii::$app->request->post('userData')
+            ),
+        ];
     }
 }

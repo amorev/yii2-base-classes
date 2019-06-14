@@ -37,12 +37,22 @@ class AdminApiVendorModule extends AdminApiModule implements BootstrapInterface
     const EVENT_USER_SAVED = 'event_user_saved';
     const EVENT_USER_BEFORE_SEND = 'event_user_before_send';
 
+    /**
+     * @var UserSettingsModel
+     */
+    public $userInformationConfiguration = null;
+
+    public $userInformationHandlerClass = SimpleUserInformationSavingHandler::class;
+    public $userSettingsHandlerClass = SimpleUserInformationSavingHandler::class;
+
     public function init()
     {
         !defined("BASE_CRUD_MODULE_PATH") ? define("BASE_CRUD_MODULE_PATH", '/'.$this->getUniqueId()) : true;
 
         \Yii::$app->response->format = Response::FORMAT_JSON;
+
         \Yii::$app->user->enableSession = false;
+
         if (!\Yii::$app->request->isOptions) {
             $this->attachBehavior('cors', OptionsCorsFilter::class);
             $this->attachBehavior('authenticator', [
@@ -58,6 +68,13 @@ class AdminApiVendorModule extends AdminApiModule implements BootstrapInterface
                 ],
             ]);
         }
+
+        \Yii::$container->setDefinitions(
+            [
+                UserInformationHandlerInterface::class => $this->userInformationHandlerClass,
+                UserSettingsHandlerInterface::class => $this->userSettingsHandlerClass,
+            ]
+        );
 
         parent::init();
     }
