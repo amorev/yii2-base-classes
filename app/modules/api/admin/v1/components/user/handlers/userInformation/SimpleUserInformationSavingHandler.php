@@ -11,6 +11,7 @@ namespace Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\
 
 use yii\web\NotFoundHttpException;
 use Zvinger\BaseClasses\app\models\work\user\object\VendorUserObject;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\AdminApiVendorModule;
 use Zvinger\BaseClasses\app\modules\api\base\BaseApiModule;
 use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation\models\information\MainUserInformationModel;
 use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation\models\information\UserInformationModel;
@@ -80,7 +81,7 @@ class SimpleUserInformationSavingHandler implements
      */
     protected function getModule()
     {
-        return BaseApiModule::getInstance();
+        return AdminApiVendorModule::getInstance();
     }
 
     /**

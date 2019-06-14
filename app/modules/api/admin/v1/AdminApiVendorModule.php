@@ -13,6 +13,9 @@ use Zvinger\BaseClasses\api\filters\OptionsCorsFilter;
 use Zvinger\BaseClasses\app\modules\api\admin\AdminApiModule;
 use yii\base\Application;
 use yii\base\BootstrapInterface;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\userInformation\UserInformationHandlerInterface;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\userInformation\UserSettingsHandlerInterface;
+use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\handlers\userInformation\SimpleUserInformationSavingHandler;
 use Zvinger\BaseClasses\app\modules\api\admin\v1\components\user\VendorAdminUserComponent;
 use yii\web\Response;
 
@@ -36,6 +39,11 @@ class AdminApiVendorModule extends AdminApiModule implements BootstrapInterface
 {
     const EVENT_USER_SAVED = 'event_user_saved';
     const EVENT_USER_BEFORE_SEND = 'event_user_before_send';
+
+
+    public $userObjectClass;
+
+    public $miscInfoKeyForUserDataInformation = 'userDataInformation';
 
     /**
      * @var UserSettingsModel
