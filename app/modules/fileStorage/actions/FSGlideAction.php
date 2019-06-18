@@ -62,7 +62,7 @@ class FSGlideAction extends GlideAction
 
             return $response;
         } catch (NotSupportedException $e) {
-            Yii::error($e->getMessage(), 'glide');
+            Yii::warning($e->getMessage(), 'glide');
             if ($object) {
                 return \Yii::$app->response->redirect($object->getFullUrl());
             }
