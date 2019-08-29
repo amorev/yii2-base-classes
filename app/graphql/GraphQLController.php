@@ -103,7 +103,6 @@ class GraphQLController extends BaseApiController
                 $variables = null;
             }
         }
-
         // создаем схему и подключаем к ней наши корневые типы
 
         $schema = new \GraphQL\Type\Schema(
