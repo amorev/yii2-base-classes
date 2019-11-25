@@ -9,8 +9,7 @@
 namespace Zvinger\BaseClasses\app\modules\fileStorage\controllers;
 
 use Obvu\Modules\Api\Admin\responses\file\UploadFileResponse;
-use yii\rest\Controller;
-use yii\web\UploadedFile;
+use yii\helpers\Json;
 use Zvinger\BaseClasses\api\controllers\BaseApiController;
 use Zvinger\BaseClasses\app\modules\fileStorage\VendorFileStorageModule;
 
