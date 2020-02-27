@@ -36,8 +36,8 @@ class DataProviderGraphQLType extends BaseGraphQLObjectType
                             if ($pagination['page']) {
                                 $value->getPagination()->setPage($pagination['page'] - 1);
                             }
-                            if ($pagination['pageSize']) {
-                                $value->getPagination()->setPageSize($pagination['pageSize']);
+                            if ($pagination['perPage']) {
+                                $value->getPagination()->setPageSize($pagination['perPage']);
                             }
 
                             return $value->getModels();
