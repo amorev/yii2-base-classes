@@ -14,6 +14,7 @@ use yii\web\NotFoundHttpException;
 use Zvinger\BaseClasses\app\components\email\models\SendData;
 use \Zvinger\BaseClasses\app\components\user\token\UserTokenHandler;
 use app\models\work\user\object\UserObject;
+use Zvinger\BaseClasses\app\modules\api\base\BaseApiModule;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\LoginRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordConfirmRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordInitRequest;
@@ -25,6 +26,10 @@ use Zvinger\BaseClasses\app\modules\api\base\responses\auth\SavePasswordResponse
 
 class AuthController extends BaseApiController
 {
+    /**
+     * @var BaseApiModule
+     */
+    public $module;
     /**
      * @SWG\Post(path="/auth/login",
      *     tags={"Auth"},

@@ -17,6 +17,8 @@ use Zvinger\BaseClasses\app\modules\api\base\components\handlers\userInformation
  * User: zvinger
  * Date: 01.12.17
  * Time: 22:47
+ *
+ * @property LoginComponent loginComponent
  */
 class BaseApiModule extends ApiModule
 {
@@ -36,10 +38,13 @@ class BaseApiModule extends ApiModule
     public $userSettingsHandlerClass = SimpleUserInformationSavingHandler::class;
     public $registrationConfig;
 
-    public $loginConfig;
+    public $loginConfig = null;
+
+    public $google2FAComponent = 'googleAuthenticatorComponent';
 
     public function init()
     {
+        parent::init();
         \Yii::$container->setDefinitions(
             [
                 UserInformationHandlerInterface::class => $this->userInformationHandlerClass,
@@ -55,10 +60,9 @@ class BaseApiModule extends ApiModule
                 'class' => LoginComponent::class,
                 'google2FA' => $this->loginConfig['google2FA'] ?: false,
                 'recaptcha' => $this->loginConfig['recaptcha'] ?: false,
-
+                'googleAuthenticatorComponent' => \Yii::$app->get($this->google2FAComponent),
             ],
         ];
-        parent::init();
     }
 
 }

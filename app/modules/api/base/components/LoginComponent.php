@@ -19,6 +19,7 @@ use Zvinger\BaseClasses\app\modules\api\base\exceptions\RecaptchaNotFound;
 use Zvinger\BaseClasses\app\modules\api\base\exceptions\RecaptchaSecretNotFound;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\LoginRequest;
 use Zvinger\BaseClasses\app\modules\api\base\responses\auth\BaseAuthLoginResponse;
+use Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent;
 
 class LoginComponent extends Component
 {
@@ -26,13 +27,20 @@ class LoginComponent extends Component
 
     public $recaptcha = false;
 
+    /**
+     * @var GoogleAuthenticatorComponent
+     */
+    public $googleAuthenticatorComponent = null;
+
     public function run(LoginRequest $request): BaseAuthLoginResponse
     {
         $user = UserObject::find()->andWhere(
-            ['or',
+            [
+                'or',
                 ['username' => $request->username],
-                ['email' => $request->username]
-            ])->one();
+                ['email' => $request->username],
+            ]
+        )->one();
 
         if (empty($user) || !$user->validatePassword($request->password)) {
             throw new UnauthorizedHttpException("Wrong username or password");
@@ -60,7 +68,7 @@ class LoginComponent extends Component
             if (!class_exists('Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent')) {
                 throw new GoogleAuthenticatorNotFound();
             }
-            $googleAuthenticatorComponent = new Zvinger\GoogleOtp\components\google\GoogleAuthenticatorComponent();
+            $googleAuthenticatorComponent = $this->googleAuthenticatorComponent;
 
             if ($googleAuthenticatorComponent->getUserGoogleAuthStatus($userId)) {
 
@@ -76,6 +84,7 @@ class LoginComponent extends Component
 
             }
         }
+
         return true;
     }
 
@@ -102,6 +111,7 @@ class LoginComponent extends Component
                 throw new BadRequestHttpException('Recaptcha validation error');
             }
         }
+
         return true;
     }
 
