@@ -12,6 +12,7 @@ use app\components\user\identity\UserIdentity;
 use app\models\work\user\object\UserObject;
 use app\modules\api\base\exceptions\GoogleAuthenticatorNotFound;
 use yii\base\Component;
+use yii\base\Event;
 use yii\web\BadRequestHttpException;
 use yii\web\UnauthorizedHttpException;
 use Zvinger\BaseClasses\app\components\user\token\UserTokenHandler;
@@ -26,6 +27,7 @@ class LoginComponent extends Component
     public $google2FA = false;
 
     public $recaptcha = false;
+    const EVENT_USER_LOGGED_IN = 'EVENT_USER_LOGGED_IN';
 
     /**
      * @var GoogleAuthenticatorComponent
@@ -52,6 +54,9 @@ class LoginComponent extends Component
         $identity = UserIdentity::findIdentity($user->id);
         $handler = new UserTokenHandler($identity->getId());
         $tokenObject = $handler->generateBearerToken();
+        $event = new UserLoginEvent();
+        $event->userId = $user->id;
+        $this->trigger(self::EVENT_USER_LOGGED_IN, $event);
 
         return \Yii::configure(
             new BaseAuthLoginResponse(),
