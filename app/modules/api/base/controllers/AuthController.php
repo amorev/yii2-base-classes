@@ -9,12 +9,14 @@
 namespace Zvinger\BaseClasses\app\modules\api\base\controllers;
 
 use app\components\user\identity\UserIdentity;
+use yii\filters\RateLimiter;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use Zvinger\BaseClasses\app\components\email\models\SendData;
 use \Zvinger\BaseClasses\app\components\user\token\UserTokenHandler;
 use app\models\work\user\object\UserObject;
 use Zvinger\BaseClasses\app\modules\api\base\BaseApiModule;
+use Zvinger\BaseClasses\app\modules\api\base\components\IpRateLimiter;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\LoginRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordConfirmRequest;
 use Zvinger\BaseClasses\app\modules\api\base\requests\auth\ResetPasswordInitRequest;
@@ -26,6 +28,21 @@ use Zvinger\BaseClasses\app\modules\api\base\responses\auth\SavePasswordResponse
 
 class AuthController extends BaseApiController
 {
+    public function behaviors()
+    {
+        $behaviors = parent::behaviors();
+        $behaviors['rateLimiter'] = [
+            'class' => RateLimiter::class,
+            'user' => new IpRateLimiter(
+                \Yii::$app->request->getUserIP(),
+                5,
+                360,
+                'base-auth-order'
+            ),
+        ];
+
+        return $behaviors;
+    }
     /**
      * @var BaseApiModule
      */
